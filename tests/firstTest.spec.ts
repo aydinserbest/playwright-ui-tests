@@ -5,41 +5,29 @@ test.beforeEach(async ({ page }) => {
     await page.getByText('Forms').click()
     await page.getByText('Form Layouts').click()
 })
-test('repeating locators', async ({ page }) => {
-    //inside unique parent with basic form, we find email and password textboxes and fill them, 
-    await page.locator('nb-card').filter({ hasText: 'Basic form' }).getByRole('textbox', { name: 'Email' }).fill('test@test.com')
-    await page.locator('nb-card').filter({ hasText: 'Basic form' }).getByRole('textbox', { name: 'Password' }).fill('Welcome123')
-    //inside unique parent with basic form, we find submit button and click it
-    //it is also unique, so we do not use name: 'SUBMIT' here
-    //await page.locator('nb-card').filter({hasText : 'Basic form'}).getByRole('button', { name: 'SUBMIT'}).click()
-    await page.locator('nb-card').filter({ hasText: 'Basic form' }).getByRole('button').click()
-
-    //above, there are duplications and repeated code, so we can use reusable locators
-    //we can extract them to a constant and use them (IN THE NEXT TEST)
-
-})
-test('reusing the locators with reusable locators', async ({ page }) => {
-    //we reformat our code,assign the locator to a constant and use this constant to call child elements
+test('extracting values', async ({ page}) => {
+    //single tekst value
     const basicForm = page.locator('nb-card').filter({ hasText: 'Basic form' })
+    const buttonText = await basicForm.locator('button').textContent()
+    expect(buttonText).toEqual('Submit')
 
-    await basicForm.getByRole('textbox', { name: 'Email' }).fill('test@test.com')
-    await basicForm.getByRole('textbox', { name: 'Password' }).fill('Welcome123')
-    await basicForm.getByRole("button").click()
+    //get all values
+    const allRadioButtonsLabels = await page.locator('nb-radio').allTextContents()
+    expect(allRadioButtonsLabels).toContain("Option 1")
+
+    //input values
+    //all texts you see on the page is not actually a text
+    //some of them are properties or just hidden values that are located in the properties
+
+    //if you want to grab a value from the web page which is not a text, is an input value
+    //you need to use the method inputValue()
+    //and it will return a text that is inside of this inputValue
+
+    const emailField =  basicForm.getByRole('textbox', { name: 'Email' })
+    await emailField.fill('test@test.com')
+    const emailFieldValue = await emailField.inputValue()
+    expect(emailFieldValue).toEqual('test@test.com')
+
+    const placeHolderValue = await emailField.getAttribute('placeholder')
+    expect(placeHolderValue).toEqual('Email')
 })
-//if you want, you can make another level of abstraction by creating a new constant, using the existing constants
-//a new constant for email input field
-test('new abstraction layer', async ({ page }) => {
-    const basicForm = page.locator('nb-card').filter({ hasText: 'Basic form' })
-    const emailInput = basicForm.getByRole('textbox', { name: 'Email' })
-    const passwordInput = basicForm.getByRole('textbox', { name: 'Password' })
-    const submitButton = basicForm.getByRole('button')
-
-    await emailInput.fill('test@test.com')
-    await passwordInput.fill('Welcome123')
-    await basicForm.locator('nb-checkbox').click()
-    await submitButton.click()
-
-    await expect(emailInput).toHaveValue('test@test.com')
-})
-//if you want to reduce duplication of your code,
-//you can always reuse your locatorsassigning them to the constants
