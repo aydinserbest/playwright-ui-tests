@@ -62,3 +62,39 @@ test('user facing locators', async ({ page }) => {
     //await page.getByRole('link', { name : 'IoT Dashboard'}).click()
     //await page.getByTestId('')
 })
+test('test locating child elements', async ({ page }) => {
+    //to go to from parent to child, use space between locators
+    await page.locator('nb-card nb-radio :text("Option 1")').click()
+    //other way:chaining locators with `locator` method, one by one
+    await page.locator('nb-card nb-radio').locator(':text("Option 2")').click()
+    //or combine regular locators method and facing locators method
+    await page.locator('nb-card').getByRole('button', { name : 'Sign in'}).first().click()
+    //or using index of the element (try to avoid this)
+    await page.locator('nb-card').nth(3).getByRole('button').click() 
+    //inside nth(3) element, there is only one button element, so no need to specify the name
+    //and also try to avoid using first() or last() methods
+
+})
+test('locating the parent elements', async ({ page }) => {
+    //1- Locate the parent 'nb-card' by matching its text content using {hasText: ...}, then find the 'Email' input inside it
+    await page.locator('nb-card', {hasText: 'Using the Grid'}).getByRole('textbox', { name : 'Email'}).click()
+
+    //2- Locate the parent 'nb-card' that contains a specific child element with ID 'inputEmail1' using {has: page.locator(...)}, 
+    // then find 'Email' input
+    await page.locator('nb-card', {has: page.locator('#inputEmail1')}).getByRole('textbox', { name : 'Email'}).click()
+
+    //3- Locate the parent 'nb-card' using filter() with text-based filtering (Basic form), then find 'Email' input inside it
+    await page.locator('nb-card').filter({hasText: 'Basic form'}).getByRole('textbox', { name : 'Email'}).click()
+
+    //4- Locate the parent 'nb-card' that contains a child element with class '.status-danger' using filter() with {has: page.locator(...)}, 
+    // then find 'Email' input
+    await page.locator('nb-card').filter({has: page.locator('.status-danger')}).getByRole('textbox', { name : 'Email'}).click()
+
+    //5- Locate the parent 'nb-card' that contains an 'nb-checkbox' element using filter({has: ...}) 
+    //   and also has specific text 'Sign in' using filter({hasText: ...})
+    await page.locator('nb-card').filter({has: page.locator('nb-checkbox')}).filter({hasText: 'Sign in'}).click()
+
+    //6- XPath: Locate the text 'Using the Grid' and move up to its parent element using '..', then find 'Email' input inside it
+    await page.locator(':text-is("Using the Grid")').locator('..').getByRole('textbox', { name : 'Email'}).click()
+
+})
