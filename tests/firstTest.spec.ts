@@ -1,50 +1,33 @@
-import { test } from '@playwright/test'
+import { test, expect } from '@playwright/test'
 
 test.beforeEach(async ({ page }) => {
     await page.goto('http://localhost:4200/')
     await page.getByText('Forms').click()
     await page.getByText('Form Layouts').click()
 })
-test('Locator syntax rules', async ({ page }) => {
-    //by Tagname
-    page.locator('input')
-    /*
-    1-`page.locator('input')` only finds the element but does nothing. 
-    You need to call an action method like `click()`, `fill()`, or `type()` to interact with it.
+test('extracting values', async ({ page}) => {
+    //single tekst value
+    const basicForm = page.locator('nb-card').filter({ hasText: 'Basic form' })
+    const buttonText = await basicForm.locator('button').textContent()
+    expect(buttonText).toEqual('Submit')
 
+    //get all values
+    const allRadioButtonsLabels = await page.locator('nb-radio').allTextContents()
+    expect(allRadioButtonsLabels).toContain("Option 1")
 
-    2- `click()` is a Promise, meaning it takes time to complete.
-    Using `await` ensures the action finishes before moving to the next step.
-    */
+    //input values
+    //all texts you see on the page is not actually a text
+    //some of them are properties or just hidden values that are located in the properties
 
-    //by ID
-    await page.locator('#inputEmail1').click()
+    //if you want to grab a value from the web page which is not a text, is an input value
+    //you need to use the method inputValue()
+    //and it will return a text that is inside of this inputValue
 
-    //by Class value
-    page.locator('.shape-rectangle') //valu starts here with a dot
+    const emailField =  basicForm.getByRole('textbox', { name: 'Email' })
+    await emailField.fill('test@test.com')
+    const emailFieldValue = await emailField.inputValue()
+    expect(emailFieldValue).toEqual('test@test.com')
 
-    //by full Class value
-    page.locator('[class="input-full-width size-medium status-basic shape-rectangle nb-transition"]')
-
-
-    //by Attribute
-    page.locator('[placeholder="Password"]') //value starts here with a square bracket
-
-    //combine different selectors
-    //for ex. by tag and by attribute
-    page.locator('input[placeholder="Password"]')
-    //or by tag and by attribute and by class
-    page.locator('input[placeholder="Password"].shape-rectangle')
-    //or, by tag and by attribute and by attribute
-    page.locator('input[placeholder="Password"][nbinput]')
-    //by Xpath (not recommended)
-    page.locator('//input[@placeholder="Password"]')
-    //or
-    page.locator('//*[@id="inputEmail1"]')
-
-    //by partial text match
-    page.locator(':text("Using")')
-    //by exact text match
-    page.locator(':text-is("Using the Grid")')
-
+    const placeHolderValue = await emailField.getAttribute('placeholder')
+    expect(placeHolderValue).toEqual('Email')
 })
