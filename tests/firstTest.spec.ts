@@ -1,100 +1,45 @@
-import { test } from '@playwright/test'
+import { test, expect } from '@playwright/test'
 
 test.beforeEach(async ({ page }) => {
     await page.goto('http://localhost:4200/')
     await page.getByText('Forms').click()
     await page.getByText('Form Layouts').click()
 })
-test('Locator syntax rules', async ({ page }) => {
-    //by Tagname
-    page.locator('input')
-    /*
-    1-`page.locator('input')` only finds the element but does nothing. 
-    You need to call an action method like `click()`, `fill()`, or `type()` to interact with it.
+test('repeating locators', async ({ page }) => {
+    //inside unique parent with basic form, we find email and password textboxes and fill them, 
+    await page.locator('nb-card').filter({ hasText: 'Basic form' }).getByRole('textbox', { name: 'Email' }).fill('test@test.com')
+    await page.locator('nb-card').filter({ hasText: 'Basic form' }).getByRole('textbox', { name: 'Password' }).fill('Welcome123')
+    //inside unique parent with basic form, we find submit button and click it
+    //it is also unique, so we do not use name: 'SUBMIT' here
+    //await page.locator('nb-card').filter({hasText : 'Basic form'}).getByRole('button', { name: 'SUBMIT'}).click()
+    await page.locator('nb-card').filter({ hasText: 'Basic form' }).getByRole('button').click()
 
-
-    2- `click()` is a Promise, meaning it takes time to complete.
-    Using `await` ensures the action finishes before moving to the next step.
-    */
-
-    //by ID
-    await page.locator('#inputEmail1').click()
-
-    //by Class value
-    page.locator('.shape-rectangle') //valu starts here with a dot
-
-    //by full Class value
-    page.locator('[class="input-full-width size-medium status-basic shape-rectangle nb-transition"]')
-
-
-    //by Attribute
-    page.locator('[placeholder="Password"]') //value starts here with a square bracket
-
-    //combine different selectors
-    //for ex. by tag and by attribute
-    page.locator('input[placeholder="Password"]')
-    //or by tag and by attribute and by class
-    page.locator('input[placeholder="Password"].shape-rectangle')
-    //or, by tag and by attribute and by attribute
-    page.locator('input[placeholder="Password"][nbinput]')
-    //by Xpath (not recommended)
-    page.locator('//input[@placeholder="Password"]')
-    //or
-    page.locator('//*[@id="inputEmail1"]')
-
-    //by partial text match
-    page.locator(':text("Using")')
-    //by exact text match
-    page.locator(':text-is("Using the Grid")')
+    //above, there are duplications and repeated code, so we can use reusable locators
+    //we can extract them to a constant and use them (IN THE NEXT TEST)
 
 })
+test('reusing the locators with reusable locators', async ({ page }) => {
+    //we reformat our code,assign the locator to a constant and use this constant to call child elements
+    const basicForm = page.locator('nb-card').filter({ hasText: 'Basic form' })
 
-test('user facing locators', async ({ page }) => {
-    await page.getByRole('textbox', { name: 'Email' }).first().click()
-    await page.getByRole('button', { name: 'Sign in'}).first().click()
-
-    await page.getByPlaceholder('Jane Doe').click()
-    await page.getByLabel('Email').first().click()
-
-    await page.getByText('Using the Grid').click()
-    await page.getByTitle('IoT Dashboard').click()
-    //or
-    //await page.getByRole('link', { name : 'IoT Dashboard'}).click()
-    //await page.getByTestId('')
+    await basicForm.getByRole('textbox', { name: 'Email' }).fill('test@test.com')
+    await basicForm.getByRole('textbox', { name: 'Password' }).fill('Welcome123')
+    await basicForm.getByRole("button").click()
 })
-test('test locating child elements', async ({ page }) => {
-    //to go to from parent to child, use space between locators
-    await page.locator('nb-card nb-radio :text("Option 1")').click()
-    //other way:chaining locators with `locator` method, one by one
-    await page.locator('nb-card nb-radio').locator(':text("Option 2")').click()
-    //or combine regular locators method and facing locators method
-    await page.locator('nb-card').getByRole('button', { name : 'Sign in'}).first().click()
-    //or using index of the element (try to avoid this)
-    await page.locator('nb-card').nth(3).getByRole('button').click() 
-    //inside nth(3) element, there is only one button element, so no need to specify the name
-    //and also try to avoid using first() or last() methods
+//if you want, you can make another level of abstraction by creating a new constant, using the existing constants
+//a new constant for email input field
+test('new abstraction layer', async ({ page }) => {
+    const basicForm = page.locator('nb-card').filter({ hasText: 'Basic form' })
+    const emailInput = basicForm.getByRole('textbox', { name: 'Email' })
+    const passwordInput = basicForm.getByRole('textbox', { name: 'Password' })
+    const submitButton = basicForm.getByRole('button')
 
+    await emailInput.fill('test@test.com')
+    await passwordInput.fill('Welcome123')
+    await basicForm.locator('nb-checkbox').click()
+    await submitButton.click()
+
+    await expect(emailInput).toHaveValue('test@test.com')
 })
-test('locating the parent elements', async ({ page }) => {
-    //1- Locate the parent 'nb-card' by matching its text content using {hasText: ...}, then find the 'Email' input inside it
-    await page.locator('nb-card', {hasText: 'Using the Grid'}).getByRole('textbox', { name : 'Email'}).click()
-
-    //2- Locate the parent 'nb-card' that contains a specific child element with ID 'inputEmail1' using {has: page.locator(...)}, 
-    // then find 'Email' input
-    await page.locator('nb-card', {has: page.locator('#inputEmail1')}).getByRole('textbox', { name : 'Email'}).click()
-
-    //3- Locate the parent 'nb-card' using filter() with text-based filtering (Basic form), then find 'Email' input inside it
-    await page.locator('nb-card').filter({hasText: 'Basic form'}).getByRole('textbox', { name : 'Email'}).click()
-
-    //4- Locate the parent 'nb-card' that contains a child element with class '.status-danger' using filter() with {has: page.locator(...)}, 
-    // then find 'Email' input
-    await page.locator('nb-card').filter({has: page.locator('.status-danger')}).getByRole('textbox', { name : 'Email'}).click()
-
-    //5- Locate the parent 'nb-card' that contains an 'nb-checkbox' element using filter({has: ...}) 
-    //   and also has specific text 'Sign in' using filter({hasText: ...})
-    await page.locator('nb-card').filter({has: page.locator('nb-checkbox')}).filter({hasText: 'Sign in'}).click()
-
-    //6- XPath: Locate the text 'Using the Grid' and move up to its parent element using '..', then find 'Email' input inside it
-    await page.locator(':text-is("Using the Grid")').locator('..').getByRole('textbox', { name : 'Email'}).click()
-
-})
+//if you want to reduce duplication of your code,
+//you can always reuse your locatorsassigning them to the constants
