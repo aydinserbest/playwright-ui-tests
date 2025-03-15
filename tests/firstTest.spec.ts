@@ -31,3 +31,37 @@ test('extracting values', async ({ page}) => {
     const placeHolderValue = await emailField.getAttribute('placeholder')
     expect(placeHolderValue).toEqual('Email')
 })
+test('assertions', async ({ page }) => {
+    //General assertions
+    //we just provide the VALUE that we want to assert
+    const basicForm = page.locator('nb-card').filter({ hasText: 'Basic form' }).locator('button')
+    const value = 5
+    expect(value).toEqual(5)
+
+    const text = await basicForm.textContent()
+    expect(text).toContain('Submit')
+    //toContain is a general assertion
+    //WILL NOT WAIT any condition, simply perform tthe assertion
+
+    //Locator assertions
+    //before locator assertions, we provide await keyword before expect
+
+    await expect(basicForm).toHaveText('Submit')
+    //toHaveText is a Locator assertion
+    //they can interact with the web elements
+    /*
+    toHaveText method will search for the test inside of webelement (basicForm)
+    and when he find the expected text, it will make an assertion and return true
+    locator assertions have their own time-out
+    this type of assertion will wait up to 5 sec for the element to be available
+    WHILE THE GENERAL ASSERTİONS will not wait,
+    LOCATOR ASSERTIONS WILL WAIT
+    */
+   //soft assertion
+   //not a good practice to use 
+   await expect.soft(basicForm).toHaveText('Submit')
+    //soft assertion will not fail the test if the assertion is not true
+    //if the assertion above fails, the test will continue to run
+    //the button will be clicked despite the assertion is not true
+    await basicForm.click()
+})
