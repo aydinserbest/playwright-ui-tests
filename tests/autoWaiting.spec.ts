@@ -1,0 +1,93 @@
+import { test, expect } from '@playwright/test'
+
+test.beforeEach(async ({ page }) => {
+    await page.goto('http://uitestingplayground.com/ajax')
+    await page.getByText('Button Triggering AJAX Request').click()
+})
+//PW has a built-in waiting mechanism that automatically waits for elements to be ready
+//..before performing actions on them.
+//This feature is called auto-waiting.
+//but they are limited to certain methods, such as click() and textContent().
+//..and not all methods have auto-waiting implemented.
+//..so we need to add explicit waits for those methods that do not have auto-waiting implemented.
+test("PW Methods which Auto Waits and which does not wait ", async ({ page }) => {
+
+    //auto-waits:
+    //class value'sunu locate ederken, . -dot kullanıyoruz
+    const successButton = page.locator('.bg-success')
+    //example-1
+    //await successButton.click() → Playwright automatically waits up to 30 seconds for the element to be ready, 
+    //so no extra wait is needed.
+    
+    //example-2
+    //const text = await successButton.textContent()//→ This method also waits for the button to be available before retrieving the text.
+
+    
+    //example-3
+    //but if we use allTextContents() method, it doesn't wait for the element to be available
+    //→ Unlike the others, `allTextContents()` does not wait for the text to appear. 
+    //To avoid issues, we need to explicitly wait for the element before calling it,
+    //if we did not add a wait before allTextContents(), it would throw an error.
+    await successButton.waitFor({ state: 'attached' }) //you can add additional wait for a specific state
+    //we want to grab the text from this element:
+    const text = await successButton.allTextContents() 
+    expect(text).toContain('Data loaded with AJAX get request.')
+    // expect(text).toEqual('Data loaded with AJAX get request.')
+    /*
+    Above, using toEqual() will throw an error because:
+    1. The expected value is a string, 
+    but the received value is an array containing a string.
+    2. toEqual() requires both data type and content to match exactly.
+    3. Since a string is not the same as an array containing that string, 
+    the assertion fails.
+
+    toEqual() performs a deep equality check,
+    meaning both data types and content must match exactly.
+    (e.g., string ≠ array)
+
+    toContain() → Checks if a string or array contains a specific value.
+    It does not require an exact match, only checks for inclusion.
+    */
+})
+
+test("Locator assertions default time-out", async ({ page }) => {
+    const successButton = page.locator('.bg-success')
+    //Default time-out for the locator assertion is 5 seconds
+    //so this assertion fails with message: Error: Timed out 5000ms waiting for
+    //await expect(successButton).toHaveText('Data loaded with AJAX get request.')
+    
+    //but we can override the time-out for this method
+    await expect(successButton).toHaveText('Data loaded with AJAX get request.', { timeout: 20000 })
+})
+//alternative ways in PW ,when you are dealing with commands that do not wait for an element
+//..that do not have automatic waiting implemented
+
+test('alternative waits for an element', async ({ page }) => {
+    const successButton = page.locator('.bg-success')
+    //we use allTextContents() method as example because it doesn't wait,
+    //element inside the expect, is not visible yet
+    
+    //wait for element
+    //await page.waitForSelector('.bg-success')
+
+    //wait for particular response
+    //await page.waitForResponse('http://uitestingplayground.com/ajaxdata')
+
+    //wait for network calls to be completed (NOT RECOMMENDED)
+    //PW will wait untill all the API calls in the networking tab of the browser 
+    //will be completed and only then will go to the next line of code
+    //but unrelavant network calls will also be waited and if any of the network call
+    //is not completed which is not important for this test, test will be failed
+    await page.waitForLoadState('networkidle')
+
+    //not recommended-hard coded time
+    //await page.waitForTimeout(5000)
+
+    //wait to navigate to a new URL
+    //await page.waitForURL('...')
+
+    const text = await successButton.allTextContents() 
+    await expect(successButton).toHaveText('Data loaded with AJAX get request.')
+})
+
+
