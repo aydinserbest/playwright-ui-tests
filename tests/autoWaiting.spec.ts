@@ -32,22 +32,6 @@ test("PW Methods which Auto Waits and which does not wait ", async ({ page }) =>
     //we want to grab the text from this element:
     const text = await successButton.allTextContents() 
     expect(text).toContain('Data loaded with AJAX get request.')
-    // expect(text).toEqual('Data loaded with AJAX get request.')
-    /*
-    Above, using toEqual() will throw an error because:
-    1. The expected value is a string, 
-    but the received value is an array containing a string.
-    2. toEqual() requires both data type and content to match exactly.
-    3. Since a string is not the same as an array containing that string, 
-    the assertion fails.
-
-    toEqual() performs a deep equality check,
-    meaning both data types and content must match exactly.
-    (e.g., string ≠ array)
-
-    toContain() → Checks if a string or array contains a specific value.
-    It does not require an exact match, only checks for inclusion.
-    */
 })
 
 test("Locator assertions default time-out", async ({ page }) => {
@@ -59,35 +43,16 @@ test("Locator assertions default time-out", async ({ page }) => {
     //but we can override the time-out for this method
     await expect(successButton).toHaveText('Data loaded with AJAX get request.', { timeout: 20000 })
 })
-//alternative ways in PW ,when you are dealing with commands that do not wait for an element
-//..that do not have automatic waiting implemented
-
-test('alternative waits for an element', async ({ page }) => {
+test('timeouts' , async ({ page }) => {
     const successButton = page.locator('.bg-success')
-    //we use allTextContents() method as example because it doesn't wait,
-    //element inside the expect, is not visible yet
-    
-    //wait for element
-    //await page.waitForSelector('.bg-success')
+    await successButton.click({})
+    //we know the successButton element will be available after 15 seconds
+    //so we set the timeout to 16 seconds
+    //according to the default configuration,if you run this test,
+    //it should pass because the default timeout is 30 seconds
+    //and we know that (checked manually) clicking the button takes 15 seconds for the button to shows up
 
-    //wait for particular response
-    //await page.waitForResponse('http://uitestingplayground.com/ajaxdata')
 
-    //wait for network calls to be completed (NOT RECOMMENDED)
-    //PW will wait untill all the API calls in the networking tab of the browser 
-    //will be completed and only then will go to the next line of code
-    //but unrelavant network calls will also be waited and if any of the network call
-    //is not completed which is not important for this test, test will be failed
-    await page.waitForLoadState('networkidle')
-
-    //not recommended-hard coded time
-    //await page.waitForTimeout(5000)
-
-    //wait to navigate to a new URL
-    //await page.waitForURL('...')
-
-    const text = await successButton.allTextContents() 
-    await expect(successButton).toHaveText('Data loaded with AJAX get request.')
 })
 
 
