@@ -26,6 +26,7 @@
     "@nebular/security": "10.0.0",
     "@nebular/theme": "10.0.0",
     "@swimlane/ngx-charts": "^20.1.2",
+    "@types/ws": "^7.4.7",
     "angular2-chartjs": "0.4.1",
     "bootstrap": "4.3.1",
     "classlist.js": "1.1.20150312",
@@ -40,7 +41,7 @@
     "ng2-smart-table": "^1.6.0",
     "ngx-echarts": "^4.2.2",
     "normalize.css": "6.0.0",
-    "pace-js": "1.0.2",
+    "pace-js": "^1.0.2",
     "roboto-fontface": "0.8.0",
     "rxjs": "6.6.2",
     "rxjs-compat": "6.3.0",
@@ -70,6 +71,7 @@
     "ts-node": "3.2.2",
     "tslint": "~6.1.0",
     "tslint-language-service": "^0.9.9",
-    "typescript": "~4.6.4"
+    "typescript": "~4.6.4",
+    "webpack": "^5.98.0"
   }
 }
