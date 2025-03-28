@@ -30,7 +30,7 @@ test('radio buttons', async ({page}) => {
 
     //get the radio button by label
     await parentUsingTheGridForm.getByLabel('Option 1').check({force: true})
-     //validet the staus of radio button if it is checked
+     //validate the staus of radio button if it is checked
     //1-with generic assertions
     const radioStatus = await parentUsingTheGridForm.getByRole('radio', {name: 'Option 1'}).isChecked()
     //isChecked method will extract the status of the radio button, if it is checked or not
