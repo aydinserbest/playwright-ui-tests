@@ -51,8 +51,6 @@ test('timeouts' , async ({ page }) => {
     //according to the default configuration,if you run this test,
     //it should pass because the default timeout is 30 seconds
     //and we know that (checked manually) clicking the button takes 15 seconds for the button to shows up
-
-
 })
 
 
