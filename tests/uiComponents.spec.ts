@@ -4,117 +4,102 @@ test.beforeEach(async ({ page }) => {
     await page.goto('http://localhost:4200/')
     
 })
-test.describe('Form Layouts', () => {
-    test.beforeEach(async ({ page }) => {
-        await page.getByText('Forms').click()
-    await page.getByText('Form Layouts').click()
-})
-test('input fields', async ({page}) => {
-    const usingTheEmailGridInput = page.locator('nb-card', {hasText: 'Using the Grid'}).getByRole('textbox', {name: 'Email'})
-    await usingTheEmailGridInput.fill('test@test.com')
-    await usingTheEmailGridInput.clear()
-    await usingTheEmailGridInput.pressSequentially('test2@test.com', {delay: 100})
-    //generic assertions
-    const inputValue = await usingTheEmailGridInput.inputValue()
-    //inputValue method will extract the value of the input field / from the locator
-    //and assign it to the inputValue variable
-    expect(inputValue).toEqual('test2@test.com')
-
-    //locators assertions
-    //you provide the locator to the expect method and use the method toHaveValue
-    await expect(usingTheEmailGridInput).toHaveValue('test2@test.com')
-})
-test('radio buttons', async ({page}) => {
-    //locate with the parent locator
-    const parentUsingTheGridForm = page.locator('nb-card', {hasText: 'Using the Grid'})
-
-    //get the radio button by label
-    await parentUsingTheGridForm.getByLabel('Option 1').check({force: true})
-     //validate the staus of radio button if it is checked
-    //1-with generic assertions
-    const radioStatus = await parentUsingTheGridForm.getByRole('radio', {name: 'Option 1'}).isChecked()
-    //isChecked method will extract the status of the radio button, if it is checked or not
-    //and if it is checked, it will return a true value, otherwise false
-    //and assign it to the radioStatus variable, so it is a value, a boolean value
-    //and like text inside expect (), we do not need to use await keyword
-    expect(radioStatus).toBeTruthy()
-    //get the radio button by role
-    await parentUsingTheGridForm.getByRole('radio', {name: 'Option 2'}).check({force: true})
-
-    //2- withlocator type of assertion
-    await expect(parentUsingTheGridForm.getByRole('radio', {name: 'Option 2'})).toBeChecked()
-
-    //in this validation, we are using generic assertion, but we did not assign the isChecked() method to a variable
-    //we are using it directly in the expect method
-    expect(await parentUsingTheGridForm.getByRole('radio', {name: 'Option 1'}).isChecked()).toBeFalsy()
-    //go on generic assertion with same way, but this time toBeTruthy() method is used
-    expect(await parentUsingTheGridForm.getByRole('radio', {name: 'Option 2'}).isChecked()).toBeTruthy()
-})
-
-})
 /*
-how to automate the checkboxes, how to interact with the checkboxes
-PW has a special method to slect and unselect the checkbox
-we will learn how to select all checkboxes and how to unselect all checkboxes
-as wel as how to perform assertionof this checkbox selection
+how to automate list and dropdowns types of the web elements
+how to select element from the list
+and how to loop through the list of web elements
+performing different operations:
+
+when you interact with the listenerCount, the recommended aproach would be
+to use:
+    getByRole('list')   when the list has a UL tag
+    getByRole('listitem') when the list has a LI tag
+
+
+when you validate the list content single assertion, you can use:
+    toHaveText('') locator assetion and providing the array as  your assertion value
+    to select the items from the list, the best approach is to use a filter and providing the text of the listitem
+    that you want to select:
+       .filter({ hasText: 'text' }).click()
+    and if you want to loop for your list,using JS for in loops is the best approach or for of loop
 */
-test('checkboxes', async ({page}) => {
-    //navigation to the checkbox page
-    await page.getByText('Modal & Overlays').click()
-    await page.getByText('Toastr').click()
-    //our checkbox is visually-hidde, so we need to use force: true
-    await page.getByLabel('Hide on click').click({force: true})
-    //other way to select the checkbox is check and uncheck methods
-    //difference between click and check/uncheck methods
-    //check method will select the checkbox, if it already selected, it will not unselect it
-    //uncheck method will unselect the checkbox, if it already unselected, it will not select it:
+test('lists and dropdowns', async ({ page }) => {
+    //locate from parent to child, there isa space between the parent and child
+    const dropdownMenu = page.locator('ngx-header nb-select')
+    //click on the dropdown menu to open it
+    await dropdownMenu.click()
+    //how to select items from the list
+    //the recommended ways in the PW  to interact with the list is to use the getByRole
 
-    //await page.getByLabel('Hide on click').click({force: true})
-   // await page.getByRole('checkbox', {name: 'Hide on click'}).uncheck({force: true})
+    page.getByRole('list')   //when the list has a UL tag  represent parent
+    //and the list items are the children of the parent
+    page.getByRole('listitem') //when the list has a LI tag   and the list items are the children of the parent
+    //get all list items from the list
+    //and represent the list items as an array
 
-   // and another difference, clcik() method just performs click the checkbox, 
-   // but check() method does not validate the status of checkbox, 
-   // it means check() method  will  check if the checkbox is already selected or not
-   //and it will not unselect the checkbox if it is already selected
-   //and uncheck() method will also check if the checkbox is already unselected or not
-    //and it will not select the checkbox if it is already unselected
-   //so to use check or uncheck is beter than click method
-   
-   await page.getByLabel('Prevent arising of duplicate toast').check({force: true})
+    //in our webexample, we do not have LI tag, we have a UL tag
+    //so we will use it
+    //1. approach
+    //, parent to child
+   // const optionList = page.getByRole('list').locator('nb-option')
+    //so we found ,first, the list, and then, we found the list items
+    //2. approach
+    //actually the same thing, just, locator is different
+    //again from parent to child
+    const optionList = page.locator('nb-option-list nb-option')
 
-   await page.getByLabel('Show toast with icon').uncheck({force: true})
+    //let's make an assertion that our list has all the list items in the list
+    await expect(optionList).toHaveText(["Light", "Dark", "Cosmic", "Corporate"])
 
-   //other scenario is to select all checkboxes
-    //and unselect all checkboxes
+    await optionList.filter({ hasText: 'Cosmic'}).click()
 
-    /*
-    first we need the locator of all checkboxes-a list of checkboxes
-    and then we need to iterate through the list of checkboxes
-    and check or uncheck each checkbox
-    */
-   const allBoxes = page.getByRole('checkbox')
-   //but we also need to convert the locator to an array
-   //for that we use . all() method
+    const header = page.locator('nb-layout-header')
+    await expect(header).toHaveCSS('background-color', 'rgb(50, 50, 89)')
 
-   for(const box of await allBoxes.all()){
-    //to select all checkboxes
-    await box.check({force: true})
-    //let's make a validation that all checkboxes are selected
-    //it's similar to the radio button validation above
-    //with generic assertions
-    expect(await box.isChecked()).toBeTruthy()
-    //.isChecked() method will return true if the checkbox is selected, and this is value,so we do not need to use await keyword
-   }
-    //to unselect all checkboxes
-    for(const box of await allBoxes.all()){
-        await box.uncheck({force: true})
-        //let's make a validation that all checkboxes are unselected
-        expect(await box.isChecked()).toBeFalsy()
-        //if we expect the result, FALSE, we use toBeFalsy() method
-        //if we expect the result, TRUE, we use toBeTruthy() method
-        //and this is value,so we do not need to use await keyword
+    const colors = {
+        Light: 'rgb(255, 255, 255)',
+        Dark: 'rgb(34, 43, 69)',
+        Cosmic: 'rgb(50, 50, 89)',
+        Corporate: 'rgb(255, 255, 255)'
     }
-   
+    await dropdownMenu.click()
+    //loop through the list of items
+    for(const color in colors){
+        await optionList.filter({ hasText: color }).click()
+        await expect(header).toHaveCSS('background-color', colors[color])
+        if (color !== 'Corporate') {
+            await dropdownMenu.click()
+        }
+    }
+    // What does Playwright do in this line?
+// 1. Finds the header element.
+// 2. Looks at the actual CSS rendered in the DOM.
+//    (It can be inline style or from an external file — doesn't matter.)
+// 3. Gets the value of the 'background-color' property.
+// 4. Compares it with the expected value from colors[color].
+// 5. If it matches → pass ✅, if not → fail ❌.
+
+// 'background-color' is the CSS property we want to check.
+// colors[color] gives us the expected value for that theme.
+
+// For example, if color === 'Dark':
+// colors['Dark'] → 'rgb(34, 43, 69)'
+
+//In the code, we write:
+//colors[color]
+//This represents the key (for example: "Cosmic").
+
+//But when the code runs, JavaScript does this behind the scenes:
+//colors["Cosmic"]  // and this gives us the value:
+//→ 'rgb(50, 50, 89)'
+
+//✅ We write the key,
+//✅ But when the code runs, we get the value.
+
+//✨ One-line summary:
+//👉 The expression colors[color] gives us the value of the key.
+
+
+
 
 })
-
