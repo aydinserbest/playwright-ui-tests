@@ -124,3 +124,16 @@ But when used together with .getByText('11'), you check both position and conten
 
 Let me know if you want this turned into inline // comments directly in your test!
 */
+test('web tables2', async ({ page }) => {
+  await page.getByText('Tables & Data').click()
+  await page.getByText('Smart Table').click()
+
+
+  const targetRowById = page.getByRole('row', { name: 'twitter@outlook.com' })
+  await targetRowById.locator('.nb-edit').click()
+  await targetRowById.getByPlaceholder('Age').clear()
+  await targetRowById.getByPlaceholder('Age').fill('34')
+
+  await page.locator('.nb-checkmark').click()
+
+})
