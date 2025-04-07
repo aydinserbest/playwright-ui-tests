@@ -1,56 +1,56 @@
 import { test, expect } from '@playwright/test'
 test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:4200/')
+  await page.goto('http://localhost:4200/')
 
 })
 test('web tables', async ({ page }) => {
-    await page.getByText('Tables & Data').click()
-    await page.getByText('Smart Table').click()
-    // We use getByRole to select a table row.
-    // getByRole('row') gets the entire row element.
-    // In our example, the target row has 7 <td> (cell) elements, each containing visible text.
-    // We can use any of the cell texts inside the <td> tags for the `name` property in getByRole.
-    // For example: page.getByRole('row', { name: 'twitter@outlook.com' }) 
-    // means we’re selecting the entire row that contains the cell with that value.
-    // This locator becomes our parent row locator — `targetrow` — so we can access its child cells via dot notation.
+  await page.getByText('Tables & Data').click()
+  await page.getByText('Smart Table').click()
+  // We use getByRole to select a table row.
+  // getByRole('row') gets the entire row element.
+  // In our example, the target row has 7 <td> (cell) elements, each containing visible text.
+  // We can use any of the cell texts inside the <td> tags for the `name` property in getByRole.
+  // For example: page.getByRole('row', { name: 'twitter@outlook.com' }) 
+  // means we’re selecting the entire row that contains the cell with that value.
+  // This locator becomes our parent row locator — `targetrow` — so we can access its child cells via dot notation.
 
-    const targetrow = page.getByRole('row', { name: 'twitter@outlook.com' })
-    //From our parent row locator, we locate the Edit button by its class and click it.
-    await targetrow.locator('.nb-edit').click()
-    // After clicking Edit, we want to change, for example, the content of the email cell.
-    // But we can no longer use our previous parent row locator with dot notation,
-    // because the text values we used to locate the row are no longer visible text.
-    // They are now turned into input values (attributes), not visible text.
-    // That’s why `targetrow.locator(...)` will no longer work.
-    // We need to switch to a different locator strategy:
+  const targetrow = page.getByRole('row', { name: 'twitter@outlook.com' })
+  //From our parent row locator, we locate the Edit button by its class and click it.
+  await targetrow.locator('.nb-edit').click()
+  // After clicking Edit, we want to change, for example, the content of the email cell.
+  // But we can no longer use our previous parent row locator with dot notation,
+  // because the text values we used to locate the row are no longer visible text.
+  // They are now turned into input values (attributes), not visible text.
+  // That’s why `targetrow.locator(...)` will no longer work.
+  // We need to switch to a different locator strategy:
 
-    await page.locator('input-editor').getByPlaceholder('Age').clear()
-    await page.locator('input-editor').getByPlaceholder('Age').fill('22')
-    await page.locator('.nb-checkmark').click()
-    await page.locator('.ng2-smart-pagination-nav').getByText('2').click()
-    /*
-    Above, we used page.getByRole('row', { name: '11' }) to select the entire row,
-    using "11" as the text value.
-    This means we are selecting the row that contains visible text "11" — in this case, the ID cell.
-    We could’ve used any other unique cell text in that row as well — as long as it’s visible text.
-    The key is: it must be **unique** and still rendered as text (not as input value).
-    For example, page.getByRole('row', { name: '11' }) and page.getByRole('row', { name: 'mdo@gmail.com' })
-    would both refer to the same row — before clicking the edit icon.
-    However, when using page.getByRole('row', { name: '11' }) directly, it may return multiple rows,
-    and in strict mode that will cause an error.
-    So we chain `.filter()` to narrow it down to the exact row we want.
-    */
-    const targetRowById = page.getByRole('row', { name: '11' }).filter({ has: page.locator('td').nth(1).getByText('11') })
-    targetRowById.locator('.nb-edit').click()
-    // after clicking, the variable assigned using the getByRole locator becomes invalid
-    // because {name: ...} now refers to a property value, not visible text
-    // so we need to locate the element again using standard locating methods
-    await page.locator('input-editor').getByPlaceholder('E-mail').clear()
-    await page.locator('input-editor').getByPlaceholder('E-mail').fill('pwrgt@gmail.com')
-    await page.locator('.nb-checkmark').click()
-    // after clicking, the cell values return to being visible text in the HTML
-    // so we can now use toHaveText for assertion
-    await expect(targetRowById.locator('td').nth(5)).toHaveText('pwrgt@gmail.com')
+  await page.locator('input-editor').getByPlaceholder('Age').clear()
+  await page.locator('input-editor').getByPlaceholder('Age').fill('22')
+  await page.locator('.nb-checkmark').click()
+  await page.locator('.ng2-smart-pagination-nav').getByText('2').click()
+  /*
+  Above, we used page.getByRole('row', { name: '11' }) to select the entire row,
+  using "11" as the text value.
+  This means we are selecting the row that contains visible text "11" — in this case, the ID cell.
+  We could’ve used any other unique cell text in that row as well — as long as it’s visible text.
+  The key is: it must be **unique** and still rendered as text (not as input value).
+  For example, page.getByRole('row', { name: '11' }) and page.getByRole('row', { name: 'mdo@gmail.com' })
+  would both refer to the same row — before clicking the edit icon.
+  However, when using page.getByRole('row', { name: '11' }) directly, it may return multiple rows,
+  and in strict mode that will cause an error.
+  So we chain `.filter()` to narrow it down to the exact row we want.
+  */
+  const targetRowById = page.getByRole('row', { name: '11' }).filter({ has: page.locator('td').nth(1).getByText('11') })
+  targetRowById.locator('.nb-edit').click()
+  // after clicking, the variable assigned using the getByRole locator becomes invalid
+  // because {name: ...} now refers to a property value, not visible text
+  // so we need to locate the element again using standard locating methods
+  await page.locator('input-editor').getByPlaceholder('E-mail').clear()
+  await page.locator('input-editor').getByPlaceholder('E-mail').fill('pwrgt@gmail.com')
+  await page.locator('.nb-checkmark').click()
+  // after clicking, the cell values return to being visible text in the HTML
+  // so we can now use toHaveText for assertion
+  await expect(targetRowById.locator('td').nth(5)).toHaveText('pwrgt@gmail.com')
 
 
 
