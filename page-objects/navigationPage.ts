@@ -1,12 +1,10 @@
-import { Page } from '@playwright/test'; //we imported Page fixture  from playwright library
+import { Page } from '@playwright/test'; 
 
-//class should be exported (export clas...) in order to be visible to other files inside the framework
-//we use export keyword in order to make the class visible to other files inside the framework
+//this approach is to use locators directly inside of the methods
 
 export class NavigationPage {
     readonly page: Page
 
-    //constructor will wait a parameter of a Page fixture that will be past from the test inside of the NavigationPage 
     constructor(page: Page) {
         this.page = page
     }
@@ -14,7 +12,6 @@ export class NavigationPage {
     async formLayoutsPage(){
         await this.selectGoupMenuItem('Forms')
         await this.page.getByText('Form Layouts').click()
-        //await this.waitForNumberOfSeconds(2)
     }
 
     async datepickerPage(){
