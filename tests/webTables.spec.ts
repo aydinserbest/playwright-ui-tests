@@ -43,8 +43,9 @@ test('Web Tables', async ({ page }) => {
     if the text is not the html text, we can not use getByRole
     if the text on the page that wee see is a property value, we can not use getByRole
     */
-   await page.locator('input-editor').getByPlaceholder('Age').clear()
-    await page.locator('input-editor').getByPlaceholder('Age').fill('28')
+   //await page.locator('input-editor').getByPlaceholder('Age').clear()
+   await targetRow.getByPlaceholder('Age').clear()
+    await page.locator('input-editor').getByPlaceholder('Age').fill('38')
     await page.locator('.nb-checkmark').click()
 
     //2- get the row based on the value in the specific column
